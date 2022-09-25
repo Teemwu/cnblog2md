@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+'use strict'
+
 import path from 'path'
 import { readFileSync, outputFile } from 'fs-extra'
 import html2md from 'html-to-md'
@@ -9,7 +10,7 @@ import chalk from 'chalk'
 import axios from 'axios'
 import ora from 'ora'
 import { parse } from 'node-html-parser/dist'
-
+const pkg = require('./package.json')
 const cwd = process.cwd()
 const resolve = (dir: string) => path.resolve(cwd, dir)
 
@@ -21,7 +22,7 @@ program
 	.option('-m --md <string>', 'output markdown file path', cwd)
 	.option('-i --img <string>', 'output image path', cwd)
 	.option('-mi --mdimg <string>', 'markdown image path')
-	.version('0.0.1', '-v, --version', 'output the current version')
+	.version(pkg.version, '-v, --version', 'output the current version')
 	.parse()
 
 /* -------------------------------- Constants ------------------------------- */

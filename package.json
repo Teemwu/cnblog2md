@@ -1,10 +1,11 @@
 {
   "name": "cnblog2md",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "解析博客园备份 xml 文件，生成 markdown 和对应图片文件，保存到本地",
-  "main": "bin/index.cjs",
+  "type": "module",
+  "main": "bin/cnb.cjs",
   "bin": {
-    "cnb": "bin/index.cjs"
+    "cnb": "bin/cnb.cjs"
   },
   "bugs": {
     "url": "https://github.com/Teemwu/cnblog2md/issues"
@@ -36,19 +37,19 @@
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
-    "@types/node": "^18.7.20",
-    "ts-node": "^10.9.1",
+    "@types/node": "^18.7.21",
+    "tsup": "^6.2.3",
     "typescript": "^4.8.3"
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "chalk": "4.1.2",
+    "chalk": "^5.0.1",
     "commander": "^9.4.0",
     "dayjs": "^1.11.5",
     "fs-extra": "^10.1.0",
     "handlebars": "^4.7.7",
     "html-to-md": "^0.6.0",
     "node-html-parser": "^6.1.1",
-    "ora": "5.4.1"
+    "ora": "^6.1.2"
   }
 }
