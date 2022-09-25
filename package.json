@@ -42,13 +42,13 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
-    "chalk": "^5.0.1",
+    "chalk": "4.1.2",
     "commander": "^9.4.0",
     "dayjs": "^1.11.5",
     "fs-extra": "^10.1.0",
     "handlebars": "^4.7.7",
     "html-to-md": "^0.6.0",
     "node-html-parser": "^6.1.1",
-    "ora": "^6.1.2"
+    "ora": "5.4.1"
   }
 }
