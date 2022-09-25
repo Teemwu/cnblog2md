@@ -6,10 +6,19 @@
   "bin": {
     "cnb": "bin/index.cjs"
   },
+  "bugs": {
+    "url": "https://github.com/Teemwu/cnblog2md/issues"
+  },
   "files": [
     "bin",
     "dist"
   ],
+  "preferGlobal": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Teemwu/cnblog2md.git"
+  },
+  "homepage": "https://github.com/Teemwu/cnblog2md#readme",
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,7 +28,11 @@
     "cnblog2md",
     "博客园"
   ],
-  "author": "teemwu",
+  "author": {
+    "name": "teemwu",
+    "email": "distinctwu@gmail.com",
+    "url": "https://github.com/Teemwu"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
