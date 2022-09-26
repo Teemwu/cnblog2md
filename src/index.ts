@@ -178,7 +178,8 @@ const run = async () => {
 
 		const pubDate = DATE_REGEXP.exec(note)![1]
 		const _content = CONTENT_REGEXP.exec(note)![1]
-		const content = HTML_CONTENT_REGEXP.test(_content) ? html2md(_content) : _content
+		const isHTML = HTML_CONTENT_REGEXP.test(note)
+		const content = isHTML ? html2md(_content) : _content
 		const date = dayjs(pubDate).format(TITLE_DATE_FORMATTER)
 		const mdDir = md.replace(DIR_REGEXP, (_: string, m: string) => dayjs(pubDate).format(m))
 		let mdFile = template({ title, author, date, content, ...others })
