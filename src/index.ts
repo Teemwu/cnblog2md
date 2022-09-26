@@ -1,7 +1,7 @@
 'use strict'
 
 import path from 'path'
-import { readFileSync, outputFile } from 'fs-extra'
+import { readFileSync, outputFile, pathExistsSync } from 'fs-extra'
 import html2md from 'html-to-md'
 import { program } from 'commander'
 import dayjs from 'dayjs'
@@ -10,7 +10,8 @@ import chalk from 'chalk'
 import axios from 'axios'
 import ora from 'ora'
 import { parse } from 'node-html-parser/dist'
-const pkg = require('./package.json')
+
+const pkg = require('../package.json')
 const cwd = process.cwd()
 const resolve = (dir: string) => path.resolve(cwd, dir)
 
@@ -22,11 +23,14 @@ program
 	.option('-m --md <string>', 'output markdown file path', cwd)
 	.option('-i --img <string>', 'output image path', cwd)
 	.option('-mi --mdimg <string>', 'markdown image path')
+	.option('-a --auth <string>', 'define the author')
 	.version(pkg.version, '-v, --version', 'output the current version')
 	.parse()
 
 /* -------------------------------- Constants ------------------------------- */
-const TEMPLATE_APTH = './md-template.hbs'
+const TEMPLATE_PATH = './md-template.hbs'
+const USER_TEMPLATE_1 = 'cnb-template.hbs'
+const USER_TEMPLATE_2 = 'cnb-template.handlebars'
 const ENCODING = 'utf-8'
 const TITLE_DATE_FORMATTER = 'YYYY/MM/DD HH:mm'
 const IMAGE_DATE_FORMATTER = 'YYYYMMDDHHmm'
@@ -36,6 +40,7 @@ const FAILED_TIPS = '[FAILED]'
 const INFO_TIPS = '[INFO]'
 const NOTE_REGEXP = /<item(([\s\S])*?)<\/item>/
 const TITLE_REGEXP = /<title>([\s\S]*?)<\/title>/
+const AUTHOR_REGEXP = /<author>([\s\S]*?)<\/author>/
 const DATE_REGEXP = /<pubDate(([\s\S])*?)<\/pubDate>/
 const CONTENT_REGEXP = /<!\[CDATA\[(([\s\S])*?)]]>/
 const HTML_CONTENT_REGEXP = /<!\[CDATA\[<[a-z]{1,}/
@@ -53,10 +58,20 @@ const log = {
 	fail: (msg: string) => spinner.fail(`${chalk.red(FAILED_TIPS)} ${chalk.gray(msg)}`)
 }
 
-const { file, img, md, mdimg } = program.opts()
+const { file, img, md, mdimg, auth } = program.opts()
 const xml = readFileSync(resolve(file), { encoding: ENCODING })
 const notes = xml.match(new RegExp(NOTE_REGEXP, 'g'))
-const template = compile(readFileSync(TEMPLATE_APTH, { encoding: ENCODING }), { noEscape: true })
+
+let template: any = ''
+const _compile = (name: string) => compile(readFileSync(name, { encoding: ENCODING }), { noEscape: true })
+
+if (pathExistsSync(resolve(USER_TEMPLATE_1))) {
+	template = _compile(USER_TEMPLATE_1)
+} else if (pathExistsSync(resolve(USER_TEMPLATE_2))) {
+	template = _compile(USER_TEMPLATE_2)
+} else {
+	template = _compile(TEMPLATE_PATH)
+}
 
 /**
  * Load note images
@@ -155,6 +170,7 @@ const run = async () => {
 	await Promise.all(notes.map(async note => {
 		// Replace slash by unicode
 		const title = TITLE_REGEXP.exec(note)![1].replace(/\//g, 'U+2215')
+		const author = auth || AUTHOR_REGEXP.exec(note)![1]
 		const link = LINK_REGEXP.exec(note)![1]
 		const others = await getCategoriesTags(link)
 
@@ -165,7 +181,7 @@ const run = async () => {
 		const content = HTML_CONTENT_REGEXP.test(_content) ? html2md(_content) : _content
 		const date = dayjs(pubDate).format(TITLE_DATE_FORMATTER)
 		const mdDir = md.replace(DIR_REGEXP, (_: string, m: string) => dayjs(pubDate).format(m))
-		let mdFile = template({ title, date, content, ...others })
+		let mdFile = template({ title, author, date, content, ...others })
 		const imgObj = await getMdImgMap(mdFile, pubDate)
 
 		if (imgObj) {

@@ -1,28 +1,35 @@
 'use strict';
-import path from 'path';
-import { readFileSync, outputFile } from 'fs-extra';
-import html2md from 'html-to-md';
-import { program } from 'commander';
-import dayjs from 'dayjs';
-import { compile } from 'handlebars';
-import chalk from 'chalk';
-import axios from 'axios';
-import ora from 'ora';
-import { parse } from 'node-html-parser/dist';
-const pkg = require('./package.json');
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const path_1 = __importDefault(require("path"));
+const fs_extra_1 = require("fs-extra");
+const html_to_md_1 = __importDefault(require("html-to-md"));
+const commander_1 = require("commander");
+const dayjs_1 = __importDefault(require("dayjs"));
+const handlebars_1 = require("handlebars");
+const chalk_1 = __importDefault(require("chalk"));
+const axios_1 = __importDefault(require("axios"));
+const ora_1 = __importDefault(require("ora"));
+const dist_1 = require("node-html-parser/dist");
+const pkg = require('../package.json');
 const cwd = process.cwd();
-const resolve = (dir) => path.resolve(cwd, dir);
-axios.defaults.timeout = 2e4;
+const resolve = (dir) => path_1.default.resolve(cwd, dir);
+axios_1.default.defaults.timeout = 2e4;
 /* --------------------------------- Command -------------------------------- */
-program
+commander_1.program
     .requiredOption('-f --file <string>', 'cnblog backup xml file path')
     .option('-m --md <string>', 'output markdown file path', cwd)
     .option('-i --img <string>', 'output image path', cwd)
     .option('-mi --mdimg <string>', 'markdown image path')
+    .option('-a --auth <string>', 'define the author')
     .version(pkg.version, '-v, --version', 'output the current version')
     .parse();
 /* -------------------------------- Constants ------------------------------- */
-const TEMPLATE_APTH = './md-template.hbs';
+const TEMPLATE_PATH = './md-template.hbs';
+const USER_TEMPLATE_1 = 'cnb-template.hbs';
+const USER_TEMPLATE_2 = 'cnb-template.handlebars';
 const ENCODING = 'utf-8';
 const TITLE_DATE_FORMATTER = 'YYYY/MM/DD HH:mm';
 const IMAGE_DATE_FORMATTER = 'YYYYMMDDHHmm';
@@ -32,6 +39,7 @@ const FAILED_TIPS = '[FAILED]';
 const INFO_TIPS = '[INFO]';
 const NOTE_REGEXP = /<item(([\s\S])*?)<\/item>/;
 const TITLE_REGEXP = /<title>([\s\S]*?)<\/title>/;
+const AUTHOR_REGEXP = /<author>([\s\S]*?)<\/author>/;
 const DATE_REGEXP = /<pubDate(([\s\S])*?)<\/pubDate>/;
 const CONTENT_REGEXP = /<!\[CDATA\[(([\s\S])*?)]]>/;
 const HTML_CONTENT_REGEXP = /<!\[CDATA\[<[a-z]{1,}/;
@@ -39,17 +47,27 @@ const IMAGE_REGEXP = /(?<alt>!\[[^\]]*\])\((?<filename>.*?)(?=\"|\))\)/;
 const DIR_REGEXP = /\{\{([a-z]{1,})\}\}/gi;
 const BLOGID_REGEXP = /currentBlogId = ([0-9]{1,})\;/;
 const LINK_REGEXP = /<link>(([\s\S])*?)<\/link>/;
-const spinner = ora('Start to convert...').start();
+const spinner = (0, ora_1.default)('Start to convert...').start();
 const log = {
-    info: (msg) => spinner.info(`${chalk.white(INFO_TIPS)} ${chalk.gray(msg)}`),
-    loading: (msg) => spinner.start(`${chalk.blue(LOADING_TIPS)} ${chalk.gray(msg)}`),
-    succeed: (msg) => spinner.succeed(`${chalk.green(SUCCEED_TIPS)} ${chalk.gray(msg)}`),
-    fail: (msg) => spinner.fail(`${chalk.red(FAILED_TIPS)} ${chalk.gray(msg)}`)
+    info: (msg) => spinner.info(`${chalk_1.default.white(INFO_TIPS)} ${chalk_1.default.gray(msg)}`),
+    loading: (msg) => spinner.start(`${chalk_1.default.blue(LOADING_TIPS)} ${chalk_1.default.gray(msg)}`),
+    succeed: (msg) => spinner.succeed(`${chalk_1.default.green(SUCCEED_TIPS)} ${chalk_1.default.gray(msg)}`),
+    fail: (msg) => spinner.fail(`${chalk_1.default.red(FAILED_TIPS)} ${chalk_1.default.gray(msg)}`)
 };
-const { file, img, md, mdimg } = program.opts();
-const xml = readFileSync(resolve(file), { encoding: ENCODING });
+const { file, img, md, mdimg, auth } = commander_1.program.opts();
+const xml = (0, fs_extra_1.readFileSync)(resolve(file), { encoding: ENCODING });
 const notes = xml.match(new RegExp(NOTE_REGEXP, 'g'));
-const template = compile(readFileSync(TEMPLATE_APTH, { encoding: ENCODING }), { noEscape: true });
+let template = '';
+const _compile = (name) => (0, handlebars_1.compile)((0, fs_extra_1.readFileSync)(name, { encoding: ENCODING }), { noEscape: true });
+if ((0, fs_extra_1.pathExistsSync)(resolve(USER_TEMPLATE_1))) {
+    template = _compile(USER_TEMPLATE_1);
+}
+else if ((0, fs_extra_1.pathExistsSync)(resolve(USER_TEMPLATE_2))) {
+    template = _compile(USER_TEMPLATE_2);
+}
+else {
+    template = _compile(TEMPLATE_PATH);
+}
 /**
  * Load note images
  * @param {string} item markdown image block
@@ -60,19 +78,19 @@ const template = compile(readFileSync(TEMPLATE_APTH, { encoding: ENCODING }), { 
 const loadImage = async (item, date, index) => {
     const url = IMAGE_REGEXP.exec(item)[2];
     try {
-        const res = await axios.get(url, { responseType: 'arraybuffer' });
+        const res = await axios_1.default.get(url, { responseType: 'arraybuffer' });
         if (!res || !res.data) {
             log.fail('Cannot to load image!');
             return [item, url];
         }
-        const format = (tpl) => dayjs(date).format(tpl);
+        const format = (tpl) => (0, dayjs_1.default)(date).format(tpl);
         const ext = '.' + url.split('.').pop();
         const dir = img.replace(DIR_REGEXP, (_, m) => format(m));
         const mdImgDir = mdimg ? mdimg.replace(DIR_REGEXP, (_, m) => format(m)) : dir;
         const fileName = format(IMAGE_DATE_FORMATTER) + index + ext;
-        const outputImgDir = path.resolve(cwd, dir, fileName);
-        await outputFile(outputImgDir, res.data);
-        return [item, path.resolve(mdImgDir, fileName).replace(cwd, '')];
+        const outputImgDir = path_1.default.resolve(cwd, dir, fileName);
+        await (0, fs_extra_1.outputFile)(outputImgDir, res.data);
+        return [item, path_1.default.resolve(mdImgDir, fileName).replace(cwd, '')];
     }
     catch (error) {
         log.fail(error);
@@ -103,7 +121,7 @@ const getMdImgMap = async (mdFile, date) => {
 };
 const getBlogId = async (url) => {
     try {
-        const res = await axios.get(url);
+        const res = await axios_1.default.get(url);
         return parseInt(BLOGID_REGEXP.exec(res.data)[1], 10);
     }
     catch (error) {
@@ -119,8 +137,8 @@ const getCategoriesTags = async (url) => {
         const blogId = await getBlogId(url);
         const isPublished = blogId === undefined ? '' : blogId !== -1;
         const _url = url.replace(/\/archive\/.*\.html/, `/ajax/CategoriesTags.aspx`);
-        const res = await axios.get(_url, { params: { postId, blogId } });
-        const root = parse(res.data);
+        const res = await axios_1.default.get(_url, { params: { postId, blogId } });
+        const root = (0, dist_1.parse)(res.data);
         const categories = root.querySelectorAll('#BlogPostCategory>a').map(i => i.innerText);
         const tags = root.querySelectorAll('#EntryTag>a').map(i => i.innerText);
         return { categories, tags, isPublished };
@@ -136,21 +154,22 @@ const run = async () => {
     await Promise.all(notes.map(async (note) => {
         // Replace slash by unicode
         const title = TITLE_REGEXP.exec(note)[1].replace(/\//g, 'U+2215');
+        const author = auth || AUTHOR_REGEXP.exec(note)[1];
         const link = LINK_REGEXP.exec(note)[1];
         const others = await getCategoriesTags(link);
         log.loading(title);
         const pubDate = DATE_REGEXP.exec(note)[1];
         const _content = CONTENT_REGEXP.exec(note)[1];
-        const content = HTML_CONTENT_REGEXP.test(_content) ? html2md(_content) : _content;
-        const date = dayjs(pubDate).format(TITLE_DATE_FORMATTER);
-        const mdDir = md.replace(DIR_REGEXP, (_, m) => dayjs(pubDate).format(m));
-        let mdFile = template({ title, date, content, ...others });
+        const content = HTML_CONTENT_REGEXP.test(_content) ? (0, html_to_md_1.default)(_content) : _content;
+        const date = (0, dayjs_1.default)(pubDate).format(TITLE_DATE_FORMATTER);
+        const mdDir = md.replace(DIR_REGEXP, (_, m) => (0, dayjs_1.default)(pubDate).format(m));
+        let mdFile = template({ title, author, date, content, ...others });
         const imgObj = await getMdImgMap(mdFile, pubDate);
         if (imgObj) {
             mdFile = mdFile.replace(new RegExp(IMAGE_REGEXP, 'gi'), (str, m) => `${m}(${imgObj[str]})`);
         }
-        const outputDir = path.resolve(cwd, mdDir, title + '.md');
-        await outputFile(outputDir, mdFile)
+        const outputDir = path_1.default.resolve(cwd, mdDir, title + '.md');
+        await (0, fs_extra_1.outputFile)(outputDir, mdFile)
             .then(() => log.succeed(outputDir))
             .catch(log.fail);
     }));
