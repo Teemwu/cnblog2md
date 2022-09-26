@@ -28,7 +28,7 @@ program
 	.parse()
 
 /* -------------------------------- Constants ------------------------------- */
-const TEMPLATE_PATH = './md-template.hbs'
+const TEMPLATE_PATH = '../template/md-template.hbs'
 const USER_TEMPLATE_1 = 'cnb-template.hbs'
 const USER_TEMPLATE_2 = 'cnb-template.handlebars'
 const ENCODING = 'utf-8'
