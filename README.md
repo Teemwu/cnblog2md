@@ -154,7 +154,7 @@ tags:
 | isPublished | boolean  | 是否发布文章 |
 | categories  | string[] | 文章分组     |
 | tags        | string[] | 文章标签     |
-
+| content     | string   | 文章内容     |
 
 ## License
 
