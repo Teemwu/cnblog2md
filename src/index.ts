@@ -66,11 +66,11 @@ let template: any = ''
 const _compile = (name: string) => compile(readFileSync(name, { encoding: ENCODING }), { noEscape: true })
 
 if (pathExistsSync(resolve(USER_TEMPLATE_1))) {
-	template = _compile(USER_TEMPLATE_1)
+	template = _compile(resolve(USER_TEMPLATE_1))
 } else if (pathExistsSync(resolve(USER_TEMPLATE_2))) {
-	template = _compile(USER_TEMPLATE_2)
+	template = _compile(resolve(USER_TEMPLATE_2))
 } else {
-	template = _compile(TEMPLATE_PATH)
+	template = _compile(path.resolve(__dirname, TEMPLATE_PATH))
 }
 
 /**
