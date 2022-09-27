@@ -2,7 +2,6 @@
 
 import path from 'path'
 import { readFileSync, outputFile, pathExistsSync } from 'fs-extra'
-import html2md from 'html-to-md'
 import { program } from 'commander'
 import dayjs from 'dayjs'
 import { compile } from 'handlebars'
@@ -10,6 +9,8 @@ import chalk from 'chalk'
 import axios from 'axios'
 import ora from 'ora'
 import { parse } from 'node-html-parser/dist'
+import TurndownService from 'turndown'
+import { ModelOperations } from '@vscode/vscode-languagedetection'
 
 const pkg = require('../package.json')
 const cwd = process.cwd()
@@ -48,6 +49,7 @@ const IMAGE_REGEXP = /(?<alt>!\[[^\]]*\])\((?<filename>.*?)(?=\"|\))\)/
 const DIR_REGEXP = /\{\{([a-z]{1,})\}\}/gi
 const BLOGID_REGEXP = /currentBlogId = ([0-9]{1,})\;/
 const LINK_REGEXP = /<link>(([\s\S])*?)<\/link>/
+const CODE_REGEXP = /\`\`\`([a-z]{0,})([\s\S]*?)\`\`\`/gi
 
 const spinner = ora('Start to convert...').start()
 
@@ -58,10 +60,14 @@ const log = {
 	fail: (msg: string) => spinner.fail(`${chalk.red(FAILED_TIPS)} ${chalk.gray(msg)}`)
 }
 
+// get the args
 const { file, img, md, mdimg, auth } = program.opts()
+// load the blog's backup xml file
 const xml = readFileSync(resolve(file), { encoding: ENCODING })
+// get blogs
 const notes = xml.match(new RegExp(NOTE_REGEXP, 'g'))
 
+/* -------------------------------- Template -------------------------------- */
 let template: any = ''
 const _compile = (name: string) => compile(readFileSync(name, { encoding: ENCODING }), { noEscape: true })
 
@@ -136,6 +142,11 @@ const getMdImgMap = async (mdFile: string, date: string): Promise<{ [key: string
 	return null
 }
 
+/**
+ * Get blog id
+ * @param url note blog url
+ * @returns number
+ */
 const getBlogId = async (url: string) => {
 	try {
 		const res = await axios.get(url)
@@ -147,6 +158,11 @@ const getBlogId = async (url: string) => {
 	}
 }
 
+/**
+ * Get blog categories and tages
+ * @param url blog url
+ * @returns {string[],string[],boolean}
+ */
 const getCategoriesTags = async (url: string) => {
 	try {
 		const postId = url.split('/').pop()!.replace('.html', '')
@@ -164,6 +180,59 @@ const getCategoriesTags = async (url: string) => {
 	}
 }
 
+/**
+ * Get detected programe language
+ * @param content programe language content
+ * @returns string
+ */
+const getDetectedLanguage = async (content: string) => {
+	const modulOperations = new ModelOperations()
+	const result = await modulOperations.runModel(content)
+	return result.length ? result[0].languageId : ''
+}
+
+/**
+ * Format code path
+ * @param {string} mdFile markdown string
+ * @returns {Promise<string[]>}
+ */
+const getMdCode = async (mdFile: string): Promise<string[]> => {
+	const matched = mdFile.match(CODE_REGEXP)
+
+	if (matched) {
+		const promises: any = []
+
+		matched.forEach((item) => promises.push(getDetectedLanguage(item)))
+
+		if (!promises.filter((p: any) => p).length) return []
+
+		const data = await Promise.all(promises)
+
+		if (!data) return []
+
+		return data
+	}
+
+	return []
+}
+
+/**
+ * Get the code formated content
+ * @param content markdonw content
+ * @returns string
+ */
+const getCodeFormatedContent = async (content: string) => {
+	const codeLangs = await getMdCode(content)
+	let codeIndex = 0
+
+	return content.replace(CODE_REGEXP, (_, m1, m2) => {
+		if (m1) return _
+		const str = '```' + codeLangs[codeIndex] + m2 + '\n```'
+		codeIndex++
+		return str
+	})
+}
+
 const run = async () => {
 	if (!notes) return log.fail('Input error!')
 
@@ -176,17 +245,27 @@ const run = async () => {
 
 		log.loading(title)
 
+		const turndownService = new TurndownService({ hr: '---' })
+		turndownService.addRule('pre', {
+			filter: 'pre',
+			replacement: (_, node) => ('```\n' + node.textContent + '\n```')
+		})
+
 		const pubDate = DATE_REGEXP.exec(note)![1]
+
 		const _content = CONTENT_REGEXP.exec(note)![1]
 		const isHTML = HTML_CONTENT_REGEXP.test(note)
-		const content = isHTML ? html2md(_content) : _content
+		let content = isHTML ? turndownService.turndown(_content) : _content
+
+		content = await getCodeFormatedContent(content)
+
 		const date = dayjs(pubDate).format(TITLE_DATE_FORMATTER)
 		const mdDir = md.replace(DIR_REGEXP, (_: string, m: string) => dayjs(pubDate).format(m))
 		let mdFile = template({ title, author, date, content, ...others })
 		const imgObj = await getMdImgMap(mdFile, pubDate)
 
 		if (imgObj) {
-			mdFile = mdFile.replace(new RegExp(IMAGE_REGEXP, 'gi'), (str, m) => `${m}(${imgObj[str]})`)
+			mdFile = mdFile.replace(new RegExp(IMAGE_REGEXP, 'gi'), (str: string | number, m: any) => `${m}(${imgObj[str]})`)
 		}
 
 		const outputDir = path.resolve(cwd, mdDir, title + '.md')

@@ -3,15 +3,17 @@ lockfileVersion: 5.4
 specifiers:
   '@types/fs-extra': ^9.0.13
   '@types/node': ^18.7.21
+  '@types/turndown': ^5.0.1
+  '@vscode/vscode-languagedetection': ^1.0.21
   axios: ^0.27.2
   chalk: 4.1.2
   commander: ^9.4.0
   dayjs: ^1.11.5
   fs-extra: ^10.1.0
   handlebars: ^4.7.7
-  html-to-md: ^0.6.0
   node-html-parser: ^6.1.1
   ora: 5.4.1
+  turndown: ^7.1.1
   typescript: ^4.8.3
 
 dependencies:
@@ -21,13 +23,15 @@ dependencies:
   dayjs: 1.11.5
   fs-extra: 10.1.0
   handlebars: 4.7.7
-  html-to-md: 0.6.0
   node-html-parser: 6.1.1
   ora: 5.4.1
+  turndown: 7.1.1
 
 devDependencies:
   '@types/fs-extra': 9.0.13
   '@types/node': 18.7.21
+  '@types/turndown': 5.0.1
+  '@vscode/vscode-languagedetection': 1.0.21
   typescript: 4.8.3
 
 packages:
@@ -40,6 +44,15 @@ packages:
 
   /@types/node/18.7.21:
     resolution: {integrity: sha512-rLFzK5bhM0YPyCoTC8bolBjMk7bwnZ8qeZUBslBfjZQou2ssJdWslx9CZ8DGM+Dx7QXQiiTVZ/6QO6kwtHkZCA==}
+    dev: true
+
+  /@types/turndown/5.0.1:
+    resolution: {integrity: sha512-N8Ad4e3oJxh9n9BiZx9cbe/0M3kqDpOTm2wzj13wdDUxDPjfjloWIJaquZzWE1cYTAHpjOH3rcTnXQdpEfS/SQ==}
+    dev: true
+
+  /@vscode/vscode-languagedetection/1.0.21:
+    resolution: {integrity: sha512-zSUH9HYCw5qsCtd7b31yqkpaCU6jhtkKLkvOOA8yTrIRfBSOFb8PPhgmMicD7B/m+t4PwOJXzU1XDtrM9Fd3/g==}
+    hasBin: true
     dev: true
 
   /ansi-regex/5.0.1:
@@ -187,6 +200,10 @@ packages:
       domelementtype: 2.3.0
     dev: false
 
+  /domino/2.1.6:
+    resolution: {integrity: sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==}
+    dev: false
+
   /domutils/3.0.1:
     resolution: {integrity: sha512-z08c1l761iKhDFtfXO04C7kTdPBLi41zwOZl00WS8b5eiaebNpY00HKbztwBq+e3vyqWNwWF3mP9YLUeqIrF+Q==}
     dependencies:
@@ -253,10 +270,6 @@ packages:
   /he/1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
-    dev: false
-
-  /html-to-md/0.6.0:
-    resolution: {integrity: sha512-wcTvKm/hOcNUPqrlwIdjFLk16pRKZ27r+lTSw2NpZxcwQj9tDrcGJtJPerTQIUhICfhdpWtK48dqP9+dY/b4mA==}
     dev: false
 
   /ieee754/1.2.1:
@@ -401,6 +414,12 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       has-flag: 4.0.0
+    dev: false
+
+  /turndown/7.1.1:
+    resolution: {integrity: sha512-BEkXaWH7Wh7e9bd2QumhfAXk5g34+6QUmmWx+0q6ThaVOLuLUqsnkq35HQ5SBHSaxjSfSM7US5o4lhJNH7B9MA==}
+    dependencies:
+      domino: 2.1.6
     dev: false
 
   /typescript/4.8.3:
