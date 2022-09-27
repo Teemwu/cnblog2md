@@ -11,7 +11,7 @@ import ora from 'ora'
 import { parse } from 'node-html-parser/dist'
 import TurndownService from 'turndown'
 import { ModelOperations } from '@vscode/vscode-languagedetection'
-
+import { BUNDLED_LANGUAGES } from 'shiki'
 const pkg = require('../package.json')
 const cwd = process.cwd()
 const resolve = (dir: string) => path.resolve(cwd, dir)
@@ -217,6 +217,13 @@ const getMdCode = async (mdFile: string): Promise<string[]> => {
 }
 
 /**
+ * Detect the lang is existed in the the siki's languags
+ * @param lang the programe language string
+ * @returns boolean
+ */
+const hasLang = (lang: string) => BUNDLED_LANGUAGES.some(l => l.id === lang)
+
+/**
  * Get the code formated content
  * @param content markdonw content
  * @returns string
@@ -226,8 +233,8 @@ const getCodeFormatedContent = async (content: string) => {
 	let codeIndex = 0
 
 	return content.replace(CODE_REGEXP, (_, m1, m2) => {
-		if (m1) return _
-		const str = '```' + codeLangs[codeIndex] + m2 + '\n```'
+		if (m1 && hasLang(m1)) return _
+		const str = '```' + (hasLang(codeLangs[codeIndex]) ? codeLangs[codeIndex] : '') + m2 + '\n```'
 		codeIndex++
 		return str
 	})
