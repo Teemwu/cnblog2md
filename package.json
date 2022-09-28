@@ -1,6 +1,6 @@
 {
   "name": "cnblog2md",
-  "version": "1.6.13",
+  "version": "1.6.14",
   "description": "解析博客园备份 xml 文件，生成 markdown 和对应图片文件，保存到本地",
   "type": "commonjs",
   "main": "bin/cnb.js",
@@ -50,7 +50,7 @@
     "chalk": "4.1.2",
     "commander": "^9.4.0",
     "dayjs": "^1.11.5",
-    "filenamify": "^5.1.1",
+    "filenamify": "4.3.0",
     "fs-extra": "^10.1.0",
     "handlebars": "^4.7.7",
     "node-html-parser": "^6.1.1",
