@@ -246,8 +246,8 @@ const run = async () => {
 	await Promise.all(notes.map(async note => {
 		// Replace slash by unicode
 		const title = TITLE_REGEXP.exec(note)![1].replace(/\//g, 'U+2215')
-		// Repalce colon
-		const safeTitle = title.replace(/:/g, '&#58;')
+		// Repalce colon and hyphen
+		const safeTitle = title.replace(/:/g, '&#58;').replace(/-/g, '&#45;')
 		const author = auth || AUTHOR_REGEXP.exec(note)![1]
 		const link = LINK_REGEXP.exec(note)![1]
 		const others = await getCategoriesTags(link)
