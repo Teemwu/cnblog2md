@@ -12,7 +12,6 @@ import { parse } from 'node-html-parser/dist'
 import TurndownService from 'turndown'
 import { ModelOperations } from '@vscode/vscode-languagedetection'
 import { BUNDLED_LANGUAGES } from 'shiki'
-import filenamify from 'filenamify'
 
 const pkg = require('../package.json')
 const cwd = process.cwd()
@@ -52,7 +51,7 @@ const DIR_REGEXP = /\{\{([a-z]{1,})\}\}/gi
 const BLOGID_REGEXP = /currentBlogId = ([0-9]{1,})\;/
 const LINK_REGEXP = /<link>(([\s\S])*?)<\/link>/
 const CODE_REGEXP = /\`\`\`([a-z]{0,})([\s\S]*?)\`\`\`/gi
-
+const FILENAME_REGEXP = /['|"|\/|\\|<|>|:|\?|\*]/g
 const spinner = ora('Start to convert...').start()
 
 const log = {
@@ -247,7 +246,7 @@ const run = async () => {
 
 	await Promise.all(notes.map(async note => {
 		const title = TITLE_REGEXP.exec(note)![1]
-		const fileName = filenamify(title, { replacement: '-' })
+		const fileName = title.replace(FILENAME_REGEXP, '')
 		// Repalce colon
 		const safeTitle = title.replace(/:/g, '&#58;')
 		const author = auth || AUTHOR_REGEXP.exec(note)![1]
