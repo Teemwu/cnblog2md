@@ -246,6 +246,8 @@ const run = async () => {
 	await Promise.all(notes.map(async note => {
 		// Replace slash by unicode
 		const title = TITLE_REGEXP.exec(note)![1].replace(/\//g, 'U+2215')
+		// Repalce colon
+		const safeTitle = title.replace(/:/g, '&#58;')
 		const author = auth || AUTHOR_REGEXP.exec(note)![1]
 		const link = LINK_REGEXP.exec(note)![1]
 		const others = await getCategoriesTags(link)
@@ -268,7 +270,7 @@ const run = async () => {
 
 		const date = dayjs(pubDate).format(TITLE_DATE_FORMATTER)
 		const mdDir = md.replace(DIR_REGEXP, (_: string, m: string) => dayjs(pubDate).format(m))
-		let mdFile = template({ title, author, date, content, ...others })
+		let mdFile = template({ title, safeTitle, author, date, content, ...others })
 		const imgObj = await getMdImgMap(mdFile, pubDate)
 
 		if (imgObj) {

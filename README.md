@@ -146,15 +146,16 @@ tags:
 
 ### 可用模版变量
 
-| 变量名      | 类型     | 描述         |
-| :---------- | :------- | :----------- |
-| title       | string   | 文章标题     |
-| author      | string   | 作者名       |
-| date        | string   | 文章发布日期 |
-| isPublished | boolean  | 是否发布文章 |
-| categories  | string[] | 文章分组     |
-| tags        | string[] | 文章标签     |
-| content     | string   | 文章内容     |
+| 变量名      | 类型     | 描述                                                   |
+| :---------- | :------- | :----------------------------------------------------- |
+| title       | string   | 文章标题                                               |
+| safeTitle   | string   | 标题中冒号被替换成 `&#58;`，markdown 前置 title 中报错 |
+| author      | string   | 作者名                                                 |
+| date        | string   | 文章发布日期                                           |
+| isPublished | boolean  | 是否发布文章                                           |
+| categories  | string[] | 文章分组                                               |
+| tags        | string[] | 文章标签                                               |
+| content     | string   | 文章内容                                               |
 
 ## License
 
