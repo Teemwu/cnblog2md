@@ -51,7 +51,7 @@ const DIR_REGEXP = /\{\{([a-z]{1,})\}\}/gi
 const BLOGID_REGEXP = /currentBlogId = ([0-9]{1,})\;/
 const LINK_REGEXP = /<link>(([\s\S])*?)<\/link>/
 const CODE_REGEXP = /\`\`\`([a-z]{0,})([\s\S]*?)\`\`\`/gi
-const FILENAME_REGEXP = /['|"|\/|\\|<|>|:|\?|\*|\&|\&amp;|\`|\+|,]/g
+const FILENAME_REGEXP = /['|"|\/|\\|<|>|:|\?|\*|\&amp;|\`|\+|,]/g
 const spinner = ora('Start to convert...').start()
 
 const log = {
