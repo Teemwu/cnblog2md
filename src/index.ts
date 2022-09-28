@@ -12,6 +12,8 @@ import { parse } from 'node-html-parser/dist'
 import TurndownService from 'turndown'
 import { ModelOperations } from '@vscode/vscode-languagedetection'
 import { BUNDLED_LANGUAGES } from 'shiki'
+import filenamify from 'filenamify'
+
 const pkg = require('../package.json')
 const cwd = process.cwd()
 const resolve = (dir: string) => path.resolve(cwd, dir)
@@ -244,9 +246,9 @@ const run = async () => {
 	if (!notes) return log.fail('Input error!')
 
 	await Promise.all(notes.map(async note => {
-		// Replace slash by unicode
-		const title = TITLE_REGEXP.exec(note)![1].replace(/\//g, 'U+2215')
-		// Repalce colon and hyphen
+		const title = TITLE_REGEXP.exec(note)![1]
+		const fileName = filenamify(title, { replacement: '-' })
+		// Repalce colon
 		const safeTitle = title.replace(/:/g, '&#58;')
 		const author = auth || AUTHOR_REGEXP.exec(note)![1]
 		const link = LINK_REGEXP.exec(note)![1]
@@ -277,7 +279,7 @@ const run = async () => {
 			mdFile = mdFile.replace(new RegExp(IMAGE_REGEXP, 'gi'), (str: string | number, m: any) => `${m}(${imgObj[str]})`)
 		}
 
-		const outputDir = path.resolve(cwd, mdDir, title + '.md')
+		const outputDir = path.resolve(cwd, mdDir, fileName + '.md')
 
 		await outputFile(outputDir, mdFile)
 			.then(() => log.succeed(outputDir))
