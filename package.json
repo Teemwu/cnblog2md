@@ -101,15 +101,15 @@
             "types": [
               {
                 "type": "feat",
-                "section": "特性"
+                "section": "Features"
               },
               {
                 "type": "fix",
-                "section": "修复"
+                "section": "Bug Fixes"
               },
               {
                 "type": "build",
-                "section": "其他",
+                "section": "Dependencies and Other Build Updates",
                 "hidden": false
               }
             ]
