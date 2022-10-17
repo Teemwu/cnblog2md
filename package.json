@@ -97,7 +97,6 @@
         {
           "preset": "conventionalcommits",
           "presetConfig": {
-            "header": "This is header",
             "types": [
               {
                 "type": "feat",
