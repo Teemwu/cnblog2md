@@ -9,8 +9,8 @@ import { parse } from 'node-html-parser'
 import TurndownService from 'turndown'
 import Languagedetection from '@vscode/vscode-languagedetection'
 import { BUNDLED_LANGUAGES } from 'shiki'
-import { AUTHOR_REGEXP, BLOGID_REGEXP, CODE_REGEXP, CONTENT_REGEXP, DATE_REGEXP, DIR_REGEXP, ENCODING, FILENAME_REGEXP, HTML_CONTENT_REGEXP, IMAGE_DATE_FORMATTER, IMAGE_REGEXP, LINK_REGEXP, NOTE_REGEXP, TITLE_DATE_FORMATTER, TITLE_REGEXP } from './constants.mjs'
-import { cwd, getTemplateContent, resolve } from './utils.mjs'
+import { AUTHOR_REGEXP, BLOGID_REGEXP, CODE_REGEXP, CONTENT_REGEXP, DATE_REGEXP, DIR_REGEXP, ENCODING, FILENAME_REGEXP, HTML_CONTENT_REGEXP, IMAGE_DATE_FORMATTER, IMAGE_REGEXP, LINK_REGEXP, NOTE_REGEXP, TITLE_REGEXP } from './constants.mjs'
+import { cwd, getSafeTitle, getTemplateContent, resolve } from './utils.mjs'
 import Log from './log.mjs'
 
 const { readFileSync, outputFile } = fs
@@ -234,7 +234,7 @@ const run = async () => {
     notes.map(async note => {
       const title = TITLE_REGEXP.exec(note)[1].trim()
       const fileName = title.replace(FILENAME_REGEXP, '')
-      const safeTitle = title.replace(/:/g, '&#58;')
+      const safeTitle = getSafeTitle(title)
       const author = auth || AUTHOR_REGEXP.exec(note)[1]
       const link = LINK_REGEXP.exec(note)[1]
       const others = await getCategoriesTags(link)
@@ -243,7 +243,7 @@ const run = async () => {
 
       const pubDate = DATE_REGEXP.exec(note)[1]
       const content = await getMdContent(note)
-      const date = dayjs(pubDate).format(TITLE_DATE_FORMATTER)
+      const date = getDate(pubDate)
       const mdDir = md.replace(DIR_REGEXP, (_, m) => dayjs(pubDate).format(m))
       const mdFile = await replaceMdImagePath(getTemplateContent({ title, safeTitle, author, date, content, ...others }), pubDate)
       const outputDir = path.resolve(cwd, mdDir, fileName + '.md')
