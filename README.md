@@ -125,7 +125,7 @@ tags:
 
 ```hbs
 ---
-title: {{title}}
+title: {{safeTitle}}
 author: {{author}}
 date: {{date}}
 isPublished: {{isPublished}}
