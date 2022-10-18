@@ -9,16 +9,17 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # https://github.com/actions/checkout#usage
       - name: Checkout
         uses: actions/checkout@v3
-        with: 
+        with:
           fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
-
+      # https://github.com/pnpm/action-setup
       - uses: pnpm/action-setup@v2.2.4
         name: Install pnpm
         id: pnpm-install
