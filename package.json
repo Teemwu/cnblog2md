@@ -1,6 +1,6 @@
 {
   "name": "cnblog2md",
-  "version": "1.7.0",
+  "version": "1.9.0",
   "description": "解析博客园备份 xml 文件，生成 markdown 和对应图片文件，保存到本地",
   "type": "commonjs",
   "main": "bin/cnb.mjs",
